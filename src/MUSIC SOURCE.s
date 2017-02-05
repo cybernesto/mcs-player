@@ -1,7 +1,7 @@
                          ;"WILL HARVEY'S MUSIC"
                          ;"COPYRIGHT (C) 1983"
-          ORG $4900
-          OBJ $4900
+          ORG $8500
+          OBJ $8500
 ORB       EQU $C400
 ORA       EQU $C401
 ORB2      EQU $C480
@@ -18,6 +18,7 @@ IER       EQU $C40E
 
 SONGADD   EQU $6
 CHANNADD  EQU $D6
+
           JMP INTRUPT
           JMP INIT
           JMP INITMOCK
@@ -52,7 +53,7 @@ FREQLOS   HEX 1E1F20222426292C
           HEX B7C2CEDAE7F40312
           HEX 2334465A6E849BB3
           HEX CDE9062545688CB3
-          HEX DC0836679BD20000
+          HEX DC0836679BD20101
 FREQHIS   HEX 0000000000000000
           HEX 0000000000000000
           HEX 0000000000000000
@@ -269,12 +270,15 @@ SONGADDS  LDA STARTADD
           STA TEMP2
           JSR STOPVOIC
           RTS
-INIT      JSR SONGADDS
+INIT      JSR INITPAR
+          JSR SONGADDS
           LDA #$F8
           STA $307
           STA $317
           LDA #%01000000
           STA ACR
+          LDA #%01111111
+          STA IER
           LDA #%11000000
           STA IFR
           STA IER
@@ -321,3 +325,15 @@ PAUSE     SEI
 
 CONTINUE  CLI
           RTS
+
+INITPAR   LDX #0
+]LOOP     LDA PARAMS,X
+          STA $0300,X
+          INX
+          CPX #$20
+          BNE ]LOOP
+          RTS
+PARAMS    HEX 010001000100003F
+          HEX 0000000000000000
+          HEX 010001000100003F
+          HEX 0000000000000000
