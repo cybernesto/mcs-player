@@ -10,9 +10,14 @@ DDRB2     EQU $C482
 DDRA2     EQU $C483
 DDRB      EQU $C402
 DDRA      EQU $C403
+T1CL      EQU $C404
+T1CH      EQU $C405
+ACR       EQU $C40B
+IFR       EQU $C40D
+IER       EQU $C40E
+
 SONGADD   EQU $6
 CHANNADD  EQU $D6
-
           JMP INTRUPT
           JMP INIT
           JMP INITMOCK
@@ -61,7 +66,7 @@ INTRUPT   TXA
           TYA
           PHA
           LDA #%11000000
-          STA $C40D
+          STA IFR
 CHANCE    INC DECCNTR
           INC TEMPCNTR
           LDA DECCNTR
@@ -167,7 +172,7 @@ PLUGIT    TXA
           DEX
           DEX
           DEX
-          LDA #10
+          LDA #$10
 PI2       STA CHANNADD
           TXA
           ASL
@@ -246,9 +251,9 @@ SONGADDS  LDA STARTADD
           STA SONGADD+2
           LDA STARTADD+3
           STA SONGADD+3
-          LDA #$0
+          LDA #<INTRUPT
           STA $3FE
-          LDA #$49
+          LDA #>INTRUPT
           STA $3FF
           LDA #$0
           STA CHANNADD
@@ -269,14 +274,14 @@ INIT      JSR SONGADDS
           STA $307
           STA $317
           LDA #%01000000
-          STA $C40B
+          STA ACR
           LDA #%11000000
-          STA $C40D
-          STA $C40E
+          STA IFR
+          STA IER
           LDA #$FF
-          STA $C404
+          STA T1CL
           LDA #$40
-          STA $C405
+          STA T1CH
           CLI
           RTS
 DIMINISH  LDX #$00
@@ -304,13 +309,15 @@ D3        INX
           CPX #$3
           BNE D1
           RTS
+
 PAUSE     SEI
-          LDA #$00
+          LDA #0
           STA TEMP2
           JSR STOPVOIC
           INC TEMP2
           JSR STOPVOIC
           JSR INITMOCK
           RTS
+
 CONTINUE  CLI
           RTS
