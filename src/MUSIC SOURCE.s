@@ -16,8 +16,9 @@ ACR       EQU $C40B
 IFR       EQU $C40D
 IER       EQU $C40E
 
-SONGADD   EQU $6
+SONGADD   EQU $EB
 CHANNADD  EQU $D6
+BUFFER    EQU $8400
 
           JMP INTRUPT
           JMP INIT
@@ -27,7 +28,7 @@ CHANNADD  EQU $D6
           JMP CONTINUE
 TEMPO     HEX 04
 DECAY     HEX 03
-STARTADD  HEX FE3F7E44
+STARTADD  HEX FE887E8D
 STRONG    HEX 0A
 START     HEX 00
 END       HEX 06
@@ -208,7 +209,7 @@ IM2       STY ORA
           STA ORB
           LDA #$4
           STA ORB
-          LDA $300,Y
+          LDA BUFFER,Y
           STA ORA
           LDA #$6
           STA ORB
@@ -219,7 +220,7 @@ IM2       STY ORA
           STA ORB2
           LDA #$4
           STA ORB2
-          LDA $310,Y
+          LDA BUFFER+$10,Y
           STA ORA2
           LDA #$6
           STA ORB2
@@ -256,9 +257,9 @@ SONGADDS  LDA STARTADD
           STA $3FE
           LDA #>INTRUPT
           STA $3FF
-          LDA #$0
+          LDA #<BUFFER
           STA CHANNADD
-          LDA #$3
+          LDA #>BUFFER
           STA CHANNADD+1
           LDA #$1
           STA CNTR
@@ -273,8 +274,8 @@ SONGADDS  LDA STARTADD
 INIT      JSR INITPAR
           JSR SONGADDS
           LDA #$F8
-          STA $307
-          STA $317
+          STA BUFFER+$7
+          STA BUFFER+$17
           LDA #%01000000
           STA ACR
           LDA #%01111111
@@ -295,20 +296,20 @@ D1        LDA VOICE,X
           TAY
           LDA TIED,Y
           BNE D2
-          LDA $308,X
+          LDA BUFFER+$8,X
           CMP REST
           BEQ D2
-          DEC $308,X
+          DEC BUFFER+$8,X
 D2        LDA VOICE+3,X
           CMP #$2
           BCS D3
           TAY
           LDA TIED,Y
           BNE D3
-          LDA $318,X
+          LDA BUFFER+$18,X
           CMP REST
           BEQ D3
-          DEC $318,X
+          DEC BUFFER+$18,X
 D3        INX
           CPX #$3
           BNE D1
@@ -328,7 +329,7 @@ CONTINUE  CLI
 
 INITPAR   LDX #0
 ]LOOP     LDA PARAMS,X
-          STA $0300,X
+          STA BUFFER,X
           INX
           CPX #$20
           BNE ]LOOP
