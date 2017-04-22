@@ -26,6 +26,7 @@ BUFFER    EQU $8400
           JMP SONGADDS
           JMP PAUSE
           JMP CONTINUE
+
 TEMPO     HEX 04
 DECAY     HEX 03
 STARTADD  HEX FE887E8D
@@ -35,12 +36,11 @@ END       HEX 06
 REST      HEX 08
 TEMPCNTR  HEX 00
 DECCNTR   HEX 00
-TEMP5     HEX 00
 TEMP0     HEX 00
 TEMP1     HEX 00
 TEMP2     HEX 00
 TEMP4     HEX 00
-TEMP6     HEX 00
+TEMP5     HEX 00
 CNTR      HEX 0101
 VOICE     HEX FFFFFFFFFFFF
 PLUG      HEX 00
@@ -63,13 +63,14 @@ FREQHIS   HEX 0000000000000000
           HEX 0101010101010101
           HEX 0101020202020202
           HEX 0203030303030000
+
 INTRUPT   TXA
           PHA
           TYA
           PHA
           LDA #%11000000
           STA IFR
-CHANCE    INC DECCNTR
+          INC DECCNTR
           INC TEMPCNTR
           LDA DECCNTR
           CMP DECAY
@@ -114,7 +115,7 @@ MUSIC11   LDX TEMP2
           JSR SEARCH
           LDA TEMP2
           STA VOICE,X
-          STX TEMP6
+          STX TEMP5
           LDX TEMP0
           LDA FREQLOS,X
           STA FREQLO
@@ -122,9 +123,9 @@ MUSIC11   LDX TEMP2
           STA FREQHI
           LDA STRONG
           STA PLUG
-          LDX TEMP6
+          LDX TEMP5
           JSR PLUGIT
-MUSIC7    LDX TEMP2
+          LDX TEMP2
           LDA TEMP1
           AND #$40
           STA TIED,X
@@ -146,6 +147,7 @@ MUSICRTI  PLA
           TAX
           LDA $45
           RTI
+
 SEARCH    CPX #$0
           BNE S2
           LDX START
@@ -156,6 +158,7 @@ S4        LDA VOICE,X
           BNE S4
           DEX
           RTS
+
 S2        LDX END
           DEX
 S5        LDA VOICE,X
@@ -164,6 +167,7 @@ S5        LDA VOICE,X
           CPX START
           BNE S5
 S3        RTS
+
 PLUGIT    TXA
           PHA
           TYA
@@ -195,6 +199,7 @@ PI2       STA CHANNADD
           PLA
           TAX
           RTS
+
 INITMOCK  TYA
           PHA
           LDA #$FF
@@ -232,6 +237,7 @@ IM2       STY ORA
           PLA
           TAY
           RTS
+
 STOPVOIC  LDX START
 SV2       LDA VOICE,X
           CMP TEMP2
@@ -245,6 +251,7 @@ SV3       INX
           CPX END
           BNE SV2
           RTS
+
 SONGADDS  LDA STARTADD
           STA SONGADD
           LDA STARTADD+1
@@ -271,11 +278,9 @@ SONGADDS  LDA STARTADD
           STA TEMP2
           JSR STOPVOIC
           RTS
+
 INIT      JSR INITPAR
           JSR SONGADDS
-          LDA #$F8
-          STA BUFFER+$7
-          STA BUFFER+$17
           LDA #%01000000
           STA ACR
           LDA #%01111111
@@ -289,6 +294,7 @@ INIT      JSR INITPAR
           STA T1CH
           CLI
           RTS
+
 DIMINISH  LDX #$00
 D1        LDA VOICE,X
           CMP #$2
@@ -334,7 +340,8 @@ INITPAR   LDX #0
           CPX #$20
           BNE ]LOOP
           RTS
-PARAMS    HEX 010001000100003F
+
+PARAMS    HEX 01000100010000F8
           HEX 0000000000000000
-          HEX 010001000100003F
+          HEX 01000100010000F8
           HEX 0000000000000000
