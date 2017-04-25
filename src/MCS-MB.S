@@ -336,12 +336,11 @@ CONTINUE  CLI
 INITPAR   LDX #0
 ]LOOP     LDA PARAMS,X
           STA BUFFER,X
+          STA BUFFER+$10,X
           INX
-          CPX #$20
+          CPX #$10
           BNE ]LOOP
           RTS
 
 PARAMS    HEX 01000100010000F8
-          HEX 0000000000000000
-          HEX 01000100010000F8
           HEX 0000000000000000
