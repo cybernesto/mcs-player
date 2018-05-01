@@ -1,64 +1,64 @@
-                         ;"WILL HARVEY'S MUSIC"
-                         ;"COPYRIGHT (C) 1983"
-          ;ORG $8500
-          ;OBJ $8500
+                         ;"Will Harvey's music"
+                         ;"Copyright (c) 1983"
+          ;org $8500
+          ;obj $8500
 
-OREGB     = $00
-OREGA     = $01
-ORB2      = $80
-ORA2      = $81
-DDRB2     = $82
-DDRA2     = $83
-DDRB      = $02
-DDRA      = $03
-T1CL      = $04
-T1CH      = $05
-ACR       = $0B
-IFR       = $0D
-IER       = $0E
+oregb     = $00
+orega     = $01
+orb2      = $80
+ora2      = $81
+ddrb2     = $82
+ddra2     = $83
+ddrb      = $02
+ddra      = $03
+t1cl      = $04
+t1ch      = $05
+acr       = $0b
+ifr       = $0d
+ier       = $0e
 
-SLOT      = $CE
-SONGADD   = $EB
-CHANNADD  = $D6
-SONG      = $4000
-BUFFER    = $800
+slot      = $ce
+songadd   = $eb
+channadd  = $d6
+song      = $4000
+buffer    = $800
 
-;          JMP INTRUPT
-;          JMP INIT
-;          JMP INITMOCK
-;          JMP SONGADDS
-;          JMP PAUSE
-;          JMP CONTINUE
+;          jmp intrupt
+;          jmp init
+;          jmp initmock
+;          jmp songadds
+;          jmp pause
+;          jmp continue
 
-TEMPO     !byte 04
-DECAY     !byte 03
-STARTADD  !word SONG-$02, SONG + $480 -$02
-STRONG    !byte $0A
-START     !byte 00
-END       !byte 06
-REST      !byte 08
-TEMPCNTR  !byte 00
-DECCNTR   !byte 00
-TEMP0     !byte 00
-TEMP1     !byte 00
-TEMP2     !byte 00
-TEMP4     !byte 00
-TEMP5     !byte 00
-CNTR      !byte $01,$01
-VOICE     !byte $FF,$FF,$FF,$FF,$FF,$FF
-PLUG      !byte 00
-FREQLO    !byte 00
-FREQHI    !byte 00
-TIED      !byte $00,$00
-FREQLOS   !byte $1E,$1F,$20,$22,$24,$26,$29,$2C
-          !byte $2E,$30,$33,$36,$3A,$3D,$41,$45
-          !byte $49,$4D,$52,$56,$5C,$61,$67,$6D
-          !byte $73,$7A,$81,$89,$91,$9A,$A3,$AD
-          !byte $B7,$C2,$CE,$DA,$E7,$F4,$03,$12
-          !byte $23,$34,$46,$5A,$6E,$84,$9B,$B3
-          !byte $CD,$E9,$06,$25,$45,$68,$8C,$B3
-          !byte $DC,$08,$36,$67,$9B,$D2,$01,$01
-FREQHIS   !byte $00,$00,$00,$00,$00,$00,$00,$00
+tempo     !byte 04
+decay     !byte 03
+startadd  !word song-$02, song + $480 -$02
+strong    !byte $0a
+start     !byte 00
+end       !byte 06
+rest      !byte 08
+tempcntr  !byte 00
+deccntr   !byte 00
+temp0     !byte 00
+temp1     !byte 00
+temp2     !byte 00
+temp4     !byte 00
+temp5     !byte 00
+cntr      !byte $01,$01
+voice     !byte $ff,$ff,$ff,$ff,$ff,$ff
+plug      !byte 00
+freqlo    !byte 00
+freqhi    !byte 00
+tied      !byte $00,$00
+freqlos   !byte $1e,$1f,$20,$22,$24,$26,$29,$2c
+          !byte $2e,$30,$33,$36,$3a,$3d,$41,$45
+          !byte $49,$4d,$52,$56,$5c,$61,$67,$6d
+          !byte $73,$7a,$81,$89,$91,$9a,$a3,$ad
+          !byte $b7,$c2,$ce,$da,$e7,$f4,$03,$12
+          !byte $23,$34,$46,$5a,$6e,$84,$9b,$b3
+          !byte $cd,$e9,$06,$25,$45,$68,$8c,$b3
+          !byte $dc,$08,$36,$67,$9b,$d2,$01,$01
+freqhis   !byte $00,$00,$00,$00,$00,$00,$00,$00
           !byte $00,$00,$00,$00,$00,$00,$00,$00
           !byte $00,$00,$00,$00,$00,$00,$00,$00
           !byte $00,$00,$00,$00,$00,$00,$00,$00
@@ -67,313 +67,313 @@ FREQHIS   !byte $00,$00,$00,$00,$00,$00,$00,$00
           !byte $01,$01,$02,$02,$02,$02,$02,$02
           !byte $02,$03,$03,$03,$03,$03,$00,$00
 
-INTRUPT   TXA
-          PHA
-          TYA
-          PHA
-          LDA #%11000000
-          LDY #IFR
-          STA (SLOT),Y
-          INC DECCNTR
-          INC TEMPCNTR
-          LDA DECCNTR
-          CMP DECAY
-          BNE NODECAY
-          JSR DIMINISH
-          LDA #0
-          STA DECCNTR
-NODECAY   LDA TEMPCNTR
-          CMP TEMPO
-          BEQ MUSIC
-          JMP MUSICRTI
-MUSIC     LDA #$0
-          STA TEMPCNTR
-          LDX #0
-MUSIC12   STX TEMP2
-          TXA
-          ASL
-          STA TEMP4
-          DEC CNTR,X
-          LDA CNTR,X
-          BNE MUSIC9
-          JSR STOPVOIC
-MUSIC15   LDX TEMP4
-          LDA SONGADD,X
-          CLC
-          ADC #2
-          STA SONGADD,X
-          BCC MUSIC10
-          INC SONGADD+1,X
-MUSIC10   LDA (SONGADD,X)
-          LSR
-          STA TEMP0
-          INC SONGADD,X
-          LDA (SONGADD,X)
-          DEC SONGADD,X
-          STA TEMP1
-          ORA TEMP0
-          BNE MUSIC11
-          JSR SONGADDS
-          JMP MUSIC3
-MUSIC11   LDX TEMP2
-          JSR SEARCH
-          LDA TEMP2
-          STA VOICE,X
-          STX TEMP5
-          LDX TEMP0
-          LDA FREQLOS,X
-          STA FREQLO
-          LDA FREQHIS,X
-          STA FREQHI
-          LDA STRONG
-          STA PLUG
-          LDX TEMP5
-          JSR PLUGIT
-          LDX TEMP2
-          LDA TEMP1
-          AND #$40
-          STA TIED,X
-          LDA TEMP1
-          AND #$3F
-          STA CNTR,X
-          LDA TEMP1
-          AND #$80
-          BNE MUSIC15
-MUSIC9    LDX TEMP2
-          INX
-          CPX #$2
-          BEQ MUSIC3
-          JMP MUSIC12
-MUSIC3    JSR INITMOCK
-MUSICRTI  PLA
-          TAY
-          PLA
-          TAX
-          LDA $45
-          RTI
+intrupt   txa
+          pha
+          tya
+          pha
+          lda #%11000000
+          ldy #ifr
+          sta (slot),y
+          inc deccntr
+          inc tempcntr
+          lda deccntr
+          cmp decay
+          bne nodecay
+          jsr diminish
+          lda #0
+          sta deccntr
+nodecay   lda tempcntr
+          cmp tempo
+          beq music
+          jmp musicrti
+music     lda #$0
+          sta tempcntr
+          ldx #0
+music12   stx temp2
+          txa
+          asl
+          sta temp4
+          dec cntr,x
+          lda cntr,x
+          bne music9
+          jsr stopvoic
+music15   ldx temp4
+          lda songadd,x
+          clc
+          adc #2
+          sta songadd,x
+          bcc music10
+          inc songadd+1,x
+music10   lda (songadd,x)
+          lsr
+          sta temp0
+          inc songadd,x
+          lda (songadd,x)
+          dec songadd,x
+          sta temp1
+          ora temp0
+          bne music11
+          jsr songadds
+          jmp music3
+music11   ldx temp2
+          jsr search
+          lda temp2
+          sta voice,x
+          stx temp5
+          ldx temp0
+          lda freqlos,x
+          sta freqlo
+          lda freqhis,x
+          sta freqhi
+          lda strong
+          sta plug
+          ldx temp5
+          jsr plugit
+          ldx temp2
+          lda temp1
+          and #$40
+          sta tied,x
+          lda temp1
+          and #$3f
+          sta cntr,x
+          lda temp1
+          and #$80
+          bne music15
+music9    ldx temp2
+          inx
+          cpx #$2
+          beq music3
+          jmp music12
+music3    jsr initmock
+musicrti  pla
+          tay
+          pla
+          tax
+          lda $45
+          rti
 
-SEARCH    CPX #$0
-          BNE S2
-          LDX START
-S4        LDA VOICE,X
-          BMI S3
-          INX
-          CPX END
-          BNE S4
-          DEX
-          RTS
+search    cpx #$0
+          bne s2
+          ldx start
+s4        lda voice,x
+          bmi s3
+          inx
+          cpx end
+          bne s4
+          dex
+          rts
 
-S2        LDX END
-          DEX
-S5        LDA VOICE,X
-          BMI S3
-          DEX
-          CPX START
-          BNE S5
-S3        RTS
+s2        ldx end
+          dex
+s5        lda voice,x
+          bmi s3
+          dex
+          cpx start
+          bne s5
+s3        rts
 
-PLUGIT    TXA
-          PHA
-          TYA
-          PHA
-          LDA #0
-          CPX #3
-          BCC PI2
-          DEX
-          DEX
-          DEX
-          LDA #$10
-PI2       STA CHANNADD
-          TXA
-          ASL
-          TAY
-          LDA FREQLO
-          STA (CHANNADD),Y
-          INY
-          LDA FREQHI
-          STA (CHANNADD),Y
-          TXA
-          CLC
-          ADC #$8
-          TAY
-          LDA PLUG
-          STA (CHANNADD),Y
-          PLA
-          TAY
-          PLA
-          TAX
-          RTS
+plugit    txa
+          pha
+          tya
+          pha
+          lda #0
+          cpx #3
+          bcc pi2
+          dex
+          dex
+          dex
+          lda #$10
+pi2       sta channadd
+          txa
+          asl
+          tay
+          lda freqlo
+          sta (channadd),y
+          iny
+          lda freqhi
+          sta (channadd),y
+          txa
+          clc
+          adc #$8
+          tay
+          lda plug
+          sta (channadd),y
+          pla
+          tay
+          pla
+          tax
+          rts
 
-INITMOCK  TXA
-          PHA
-          TYA
-          PHA
-          LDA #$FF
-          LDY #DDRA
-          STA (SLOT),Y
-          LDY #DDRA2
-          STA (SLOT),Y
-          LDA #$1F
-          LDY #DDRB
-          STA (SLOT),Y
-          LDY #DDRB2
-          STA (SLOT),Y
-          LDX #$0
-IM2       TXA
-          LDY #OREGA
-          STA (SLOT),Y
-          LDA #$F
-          LDY #OREGB
-          STA (SLOT),Y
-          LDA #$C
-          STA (SLOT),Y
-          LDA BUFFER,X
-          LDY #OREGA
-          STA (SLOT),Y
-          LDA #$E
-          LDY #OREGB
-          STA (SLOT),Y
-          LDA #$C
-          STA (SLOT),Y
-          TXA
-          LDY #ORA2
-          STA (SLOT),Y
-          LDA #$17
-          LDY #ORB2
-          STA (SLOT),Y
-          LDA #$14
-          STA (SLOT),Y
-          LDA BUFFER+$10,X
-          LDY #ORA2
-          STA (SLOT),Y
-          LDA #$16
-          LDY #ORB2
-          STA (SLOT),Y
-          LDA #$14
-          STA (SLOT),Y
-          INX
-          CPX #$F
-          BNE IM2
-          PLA
-          TAY
-          PLA
-          TAX
-          RTS
+initmock  txa
+          pha
+          tya
+          pha
+          lda #$ff
+          ldy #ddra
+          sta (slot),y
+          ldy #ddra2
+          sta (slot),y
+          lda #$1f
+          ldy #ddrb
+          sta (slot),y
+          ldy #ddrb2
+          sta (slot),y
+          ldx #$0
+im2       txa
+          ldy #orega
+          sta (slot),y
+          lda #$f
+          ldy #oregb
+          sta (slot),y
+          lda #$c
+          sta (slot),y
+          lda buffer,x
+          ldy #orega
+          sta (slot),y
+          lda #$e
+          ldy #oregb
+          sta (slot),y
+          lda #$c
+          sta (slot),y
+          txa
+          ldy #ora2
+          sta (slot),y
+          lda #$17
+          ldy #orb2
+          sta (slot),y
+          lda #$14
+          sta (slot),y
+          lda buffer+$10,x
+          ldy #ora2
+          sta (slot),y
+          lda #$16
+          ldy #orb2
+          sta (slot),y
+          lda #$14
+          sta (slot),y
+          inx
+          cpx #$f
+          bne im2
+          pla
+          tay
+          pla
+          tax
+          rts
 
-STOPVOIC  LDX START
-SV2       LDA VOICE,X
-          CMP TEMP2
-          BNE SV3
-          LDA #$FF
-          STA VOICE,X
-          LDA #$0
-          STA PLUG
-          JSR PLUGIT
-SV3       INX
-          CPX END
-          BNE SV2
-          RTS
+stopvoic  ldx start
+sv2       lda voice,x
+          cmp temp2
+          bne sv3
+          lda #$ff
+          sta voice,x
+          lda #$0
+          sta plug
+          jsr plugit
+sv3       inx
+          cpx end
+          bne sv2
+          rts
 
-SONGADDS  LDA STARTADD
-          STA SONGADD
-          LDA STARTADD+1
-          STA SONGADD+1
-          LDA STARTADD+2
-          STA SONGADD+2
-          LDA STARTADD+3
-          STA SONGADD+3
-          LDA #<INTRUPT
-          STA $3FE
-          LDA #>INTRUPT
-          STA $3FF
-          LDA #<BUFFER
-          STA CHANNADD
-          LDA #>BUFFER
-          STA CHANNADD+1
-          LDA #$1
-          STA CNTR
-          STA CNTR+1
-          LDA #$0
-          STA TEMP2
-          JSR STOPVOIC
-          LDA #$1
-          STA TEMP2
-          JSR STOPVOIC
-          RTS
+songadds  lda startadd
+          sta songadd
+          lda startadd+1
+          sta songadd+1
+          lda startadd+2
+          sta songadd+2
+          lda startadd+3
+          sta songadd+3
+          lda #<intrupt
+          sta $3fe
+          lda #>intrupt
+          sta $3ff
+          lda #<buffer
+          sta channadd
+          lda #>buffer
+          sta channadd+1
+          lda #$1
+          sta cntr
+          sta cntr+1
+          lda #$0
+          sta temp2
+          jsr stopvoic
+          lda #$1
+          sta temp2
+          jsr stopvoic
+          rts
 
-INIT      TYA
-          PHA
-          JSR INITPAR
-          JSR SONGADDS
-          LDA #%01000000
-          LDY #ACR
-          STA (SLOT),Y
-          LDA #%01111111
-          LDY #IER
-          STA (SLOT),Y
-          LDA #%11000000
-          LDY #IFR
-          STA (SLOT),Y
-          LDY #IER
-          STA (SLOT),Y
-          LDA #$FF
-          LDY #T1CL
-          STA (SLOT),Y
-          LDA #$40
-          LDY #T1CH
-          STA (SLOT),Y
-          CLI
-          PLA
-          TAY
-          RTS
+init      tya
+          pha
+          jsr initpar
+          jsr songadds
+          lda #%01000000
+          ldy #acr
+          sta (slot),y
+          lda #%01111111
+          ldy #ier
+          sta (slot),y
+          lda #%11000000
+          ldy #ifr
+          sta (slot),y
+          ldy #ier
+          sta (slot),y
+          lda #$ff
+          ldy #t1cl
+          sta (slot),y
+          lda #$40
+          ldy #t1ch
+          sta (slot),y
+          cli
+          pla
+          tay
+          rts
 
 
-DIMINISH  LDX #$00
-D1        LDA VOICE,X
-          CMP #$2
-          BCS D2
-          TAY
-          LDA TIED,Y
-          BNE D2
-          LDA BUFFER+$8,X
-          CMP REST
-          BEQ D2
-          DEC BUFFER+$8,X
-D2        LDA VOICE+3,X
-          CMP #$2
-          BCS D3
-          TAY
-          LDA TIED,Y
-          BNE D3
-          LDA BUFFER+$18,X
-          CMP REST
-          BEQ D3
-          DEC BUFFER+$18,X
-D3        INX
-          CPX #$3
-          BNE D1
-          RTS
+diminish  ldx #$00
+d1        lda voice,x
+          cmp #$2
+          bcs d2
+          tay
+          lda tied,y
+          bne d2
+          lda buffer+$8,x
+          cmp rest
+          beq d2
+          dec buffer+$8,x
+d2        lda voice+3,x
+          cmp #$2
+          bcs d3
+          tay
+          lda tied,y
+          bne d3
+          lda buffer+$18,x
+          cmp rest
+          beq d3
+          dec buffer+$18,x
+d3        inx
+          cpx #$3
+          bne d1
+          rts
 
-PAUSE     SEI
-          LDA #0
-          STA TEMP2
-          JSR STOPVOIC
-          INC TEMP2
-          JSR STOPVOIC
-          JSR INITMOCK
-          RTS
+pause     sei
+          lda #0
+          sta temp2
+          jsr stopvoic
+          inc temp2
+          jsr stopvoic
+          jsr initmock
+          rts
 
-CONTINUE  CLI
-          RTS
+continue  cli
+          rts
 
-INITPAR   LDX #0
-.LOOP     LDA PARAMS,X
-          STA BUFFER,X
-          STA BUFFER+$10,X
-          INX
-          CPX #$10
-          BNE .LOOP
-          RTS
+initpar   ldx #0
+.loop     lda params,x
+          sta buffer,x
+          sta buffer+$10,x
+          inx
+          cpx #$10
+          bne .loop
+          rts
 
-PARAMS    !byte $01,$00,$01,$00,$01,$00,$00,$F8
+params    !byte $01,$00,$01,$00,$01,$00,$00,$f8
           !byte $00,$00,$00,$00,$00,$00,$00,$00
